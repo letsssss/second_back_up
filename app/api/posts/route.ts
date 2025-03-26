@@ -205,6 +205,22 @@ export async function GET(request: NextRequest) {
               name: true,
               email: true,
             }
+          },
+          purchases: {
+            select: {
+              id: true,
+              orderNumber: true,
+              status: true
+            },
+            where: {
+              OR: [
+                { status: "PENDING" },
+                { status: "PROCESSING" },
+                { status: "COMPLETED" },
+                { status: "CONFIRMED" }
+              ]
+            },
+            take: 1
           }
         },
         orderBy: {
@@ -218,8 +234,20 @@ export async function GET(request: NextRequest) {
       const safePostsList = posts || [];
       console.log(`${safePostsList.length}개의 게시글을 찾았습니다.`);
       
-      // BigInt 값을 문자열로 변환
-      const serializedPosts = convertBigIntToString(safePostsList);
+      // BigInt 값을 문자열로 변환하고 post에 orderNumber 추가
+      const serializedPosts = convertBigIntToString(safePostsList).map((post: any) => {
+        // 구매 정보가 있으면 첫 번째 구매의 orderNumber를 포함
+        const orderNumber = post.purchases && post.purchases.length > 0
+          ? post.purchases[0].orderNumber
+          : undefined;
+          
+        // purchases 필드 제거하고 orderNumber 추가
+        const { purchases, ...postWithoutPurchases } = post;
+        return {
+          ...postWithoutPurchases,
+          orderNumber
+        };
+      });
       
       // 성공 응답 반환
       return addCorsHeaders(NextResponse.json({
