@@ -466,11 +466,11 @@ export default function TicketCancellationPage() {
                         <span className="font-medium text-black text-lg">{Number(ticket.ticketPrice || 0).toLocaleString()}원</span>
                       </div>
                       <Button
-                        className="bg-[#0061FF] hover:bg-[#0052D6]"
+                        className="bg-[#FFD600] hover:bg-[#FFE600] text-black font-medium px-5 py-2 rounded-lg shadow-md transition-all duration-300 hover:shadow-lg transform hover:scale-105 flex items-center"
                         onClick={() => router.push(`/ticket-cancellation/${ticket.id}`)}
                       >
                         신청하기
-                        <ArrowRight className="ml-1 h-4 w-4" />
+                        <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
                     </div>
                   </div>
