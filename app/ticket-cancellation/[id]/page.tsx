@@ -292,7 +292,7 @@ export default function TicketCancellationDetail() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            postId: parseInt(id),
+            postId: id,
             quantity: selectedSeats.length,
             selectedSeats: selectedSeatLabels,
             phoneNumber: phoneNumber,
