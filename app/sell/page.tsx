@@ -201,7 +201,7 @@ export default function SellPage() {
           time: concertTime || "미정",
           price: Number(sections[0].price.replace(/[^0-9]/g, '')),
           sections: sections.map(section => ({
-            id: section.id.toString(),
+            id: typeof section.id === 'number' ? section.id.toString() : section.id,
             label: section.name,
             price: Number(section.price.replace(/[^0-9]/g, '')),
             available: true

@@ -45,3 +45,44 @@ export function safeJsonStringify(obj: any): string {
   );
 }
 
+/**
+ * 12자리 랜덤 숫자 ID를 생성합니다.
+ * 
+ * @returns 12자리 숫자 문자열
+ */
+export function generateRandom12DigitId(): string {
+  // 12자리 숫자가 필요하므로 10^11 ~ 10^12-1 사이의 숫자 생성
+  const min = 100000000000; // 10^11
+  const max = 999999999999; // 10^12-1
+  return Math.floor(min + Math.random() * (max - min)).toString();
+}
+
+/**
+ * 중복되지 않는 12자리 랜덤 숫자 ID를 생성합니다.
+ * 
+ * @param prisma Prisma 클라이언트 인스턴스
+ * @param maxAttempts 최대 시도 횟수 (기본값: 5)
+ * @returns 중복되지 않는 12자리 ID
+ */
+export async function generateUniquePostId(prisma: any, maxAttempts: number = 5): Promise<string> {
+  let attempts = 0;
+  
+  while (attempts < maxAttempts) {
+    const id = generateRandom12DigitId();
+    
+    // 이미 존재하는 ID인지 확인
+    const existingPost = await prisma.post.findUnique({
+      where: { id: id }
+    });
+    
+    if (!existingPost) {
+      return id; // 중복되지 않는 ID 발견
+    }
+    
+    attempts++;
+  }
+  
+  // 최대 시도 횟수 초과 시 에러 발생
+  throw new Error('고유한 ID 생성에 실패했습니다. 나중에 다시 시도해주세요.');
+}
+
