@@ -2,7 +2,6 @@ import { NextResponse, NextRequest } from "next/server";
 import { PrismaClient } from "@prisma/client";
 import { getAuthenticatedUser } from "@/lib/auth";
 import { z } from "zod";
-import { generateUniquePostId, convertBigIntToString } from "@/lib/utils";
 
 const prisma = new PrismaClient();
 
@@ -22,6 +21,31 @@ const postSchema = z.object({
   contactInfo: z.string().optional(),
   type: z.string().optional(),
 });
+
+// BigInt를 문자열로 변환하는 함수
+function convertBigIntToString(obj: any): any {
+  if (obj === null || obj === undefined) {
+    return obj;
+  }
+  
+  if (typeof obj === 'bigint') {
+    return obj.toString();
+  }
+  
+  if (Array.isArray(obj)) {
+    return obj.map(item => convertBigIntToString(item));
+  }
+  
+  if (typeof obj === 'object') {
+    const newObj: any = {};
+    for (const key in obj) {
+      newObj[key] = convertBigIntToString(obj[key]);
+    }
+    return newObj;
+  }
+  
+  return obj;
+}
 
 // CORS 헤더 설정을 위한 함수
 function addCorsHeaders(response: NextResponse) {
@@ -77,14 +101,9 @@ export async function POST(request: NextRequest) {
       ));
     }
 
-    // 12자리 랜덤 숫자 ID 생성
-    const uniquePostId = await generateUniquePostId(prisma);
-    console.log("생성된 게시글 ID:", uniquePostId);
-
     // 글 저장
     const post = await prisma.post.create({
       data: {
-        id: uniquePostId,
         title: body.title,
         content: body.content,
         category: body.category || "GENERAL",
@@ -205,22 +224,6 @@ export async function GET(request: NextRequest) {
               name: true,
               email: true,
             }
-          },
-          purchases: {
-            select: {
-              id: true,
-              orderNumber: true,
-              status: true
-            },
-            where: {
-              OR: [
-                { status: "PENDING" },
-                { status: "PROCESSING" },
-                { status: "COMPLETED" },
-                { status: "CONFIRMED" }
-              ]
-            },
-            take: 1
           }
         },
         orderBy: {
@@ -234,20 +237,8 @@ export async function GET(request: NextRequest) {
       const safePostsList = posts || [];
       console.log(`${safePostsList.length}개의 게시글을 찾았습니다.`);
       
-      // BigInt 값을 문자열로 변환하고 post에 orderNumber 추가
-      const serializedPosts = convertBigIntToString(safePostsList).map((post: any) => {
-        // 구매 정보가 있으면 첫 번째 구매의 orderNumber를 포함
-        const orderNumber = post.purchases && post.purchases.length > 0
-          ? post.purchases[0].orderNumber
-          : undefined;
-          
-        // purchases 필드 제거하고 orderNumber 추가
-        const { purchases, ...postWithoutPurchases } = post;
-        return {
-          ...postWithoutPurchases,
-          orderNumber
-        };
-      });
+      // BigInt 값을 문자열로 변환
+      const serializedPosts = convertBigIntToString(safePostsList);
       
       // 성공 응답 반환
       return addCorsHeaders(NextResponse.json({

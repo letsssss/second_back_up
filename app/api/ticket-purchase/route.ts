@@ -28,7 +28,7 @@ export async function OPTIONS() {
 
 // 구매 요청 스키마
 const purchaseSchema = z.object({
-  postId: z.string(),
+  postId: z.number().int().positive(),
   quantity: z.number().int().positive().default(1),
   selectedSeats: z.string().optional(),
   phoneNumber: z.string().optional(),

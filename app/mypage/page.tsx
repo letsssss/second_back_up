@@ -37,7 +37,6 @@ interface Sale {
   status: string;
   isActive: boolean;
   sortPriority: number;
-  orderNumber?: string;
 }
 
 // 알림 타입 정의
@@ -272,8 +271,7 @@ export default function MyPage() {
             : '가격 정보 없음',
           status: statusText,
           isActive: postStatus === 'ACTIVE' || postStatus === '' || postStatus === undefined || postStatus === null,
-          sortPriority: sortPriority,  // 정렬용 우선순위 필드 추가
-          orderNumber: post.orderNumber
+          sortPriority: sortPriority  // 정렬용 우선순위 필드 추가
         };
       });
       
@@ -295,8 +293,8 @@ export default function MyPage() {
       toast.error('판매 목록을 불러오는데 실패했습니다.');
       // 더미 데이터로 대체
       setOngoingSales([
-        { id: 2, title: "웃는 남자 [더미 데이터]", date: "2024-01-09", price: "110,000원", status: "취켓팅 진행중", isActive: false, sortPriority: 1, orderNumber: undefined },
-        { id: 1, title: "아이브 팬미팅 [더미 데이터]", date: "2024-04-05", price: "88,000원", status: "판매중", isActive: true, sortPriority: 2, orderNumber: undefined },
+        { id: 2, title: "웃는 남자 [더미 데이터]", date: "2024-01-09", price: "110,000원", status: "취켓팅 진행중", isActive: false, sortPriority: 1 },
+        { id: 1, title: "아이브 팬미팅 [더미 데이터]", date: "2024-04-05", price: "88,000원", status: "판매중", isActive: true, sortPriority: 2 },
       ]);
     } finally {
       setIsLoadingSales(false);
@@ -364,8 +362,7 @@ export default function MyPage() {
             ? `${Number(purchase.totalPrice).toLocaleString()}원` 
             : '가격 정보 없음',
           status: getStatusText(status),
-          sellerId: purchase.sellerId,
-          orderNumber: purchase.orderNumber
+          sellerId: purchase.sellerId
         };
       });
       
@@ -386,8 +383,8 @@ export default function MyPage() {
       toast.error('구매 목록을 불러오는데 실패했습니다.');
       // 더미 데이터로 대체
       setOngoingPurchases([
-        { id: 1, title: "세븐틴 콘서트 [더미 데이터]", date: "2024-03-20", price: "165,000원", status: "입금 대기중", orderNumber: undefined },
-        { id: 2, title: "데이식스 전국투어 [더미 데이터]", date: "2024-02-01", price: "99,000원", status: "배송 준비중", orderNumber: undefined },
+        { id: 1, title: "세븐틴 콘서트 [더미 데이터]", date: "2024-03-20", price: "165,000원", status: "입금 대기중" },
+        { id: 2, title: "데이식스 전국투어 [더미 데이터]", date: "2024-02-01", price: "99,000원", status: "배송 준비중" },
       ]);
     } finally {
       setIsLoadingPurchases(false);
@@ -838,7 +835,7 @@ export default function MyPage() {
                         {item.price}
                       </p>
                       <p className="text-sm text-blue-600">{item.status}</p>
-                      <Link href={`/transaction/order/${item.orderNumber}`}>
+                      <Link href={`/transaction/${item.id}`}>
                         <Button className="mt-2 text-sm" variant="outline">
                           거래 상세
                         </Button>
@@ -907,7 +904,7 @@ export default function MyPage() {
                         item.status === "거래취소" ? "text-red-600" : "text-gray-600"
                       }`}>{item.status}</p>
                       <div className="flex mt-2 justify-between items-center">
-                        <Link href={`/transaction/order/${item.orderNumber}`}>
+                        <Link href={`/seller/transaction/${item.id}`}>
                           <Button className="text-sm" variant="outline">
                             거래 상세
                           </Button>

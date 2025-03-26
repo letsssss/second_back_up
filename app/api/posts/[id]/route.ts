@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
 import { getAuthenticatedUser } from "@/lib/auth"
-import { convertBigIntToString } from "@/lib/utils"
 
 const prisma = new PrismaClient()
 
@@ -19,10 +18,10 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    // params.id 처리
-    const id = params.id;
+    // params.id 비동기적으로 처리
+    const id = parseInt(params.id as string)
     
-    if (!id) {
+    if (isNaN(id)) {
       return addCorsHeaders(NextResponse.json(
         { error: '유효하지 않은 게시글 ID입니다' },
         { status: 400 }
@@ -57,8 +56,10 @@ export async function GET(
     }
     
     // 응답 형태 변환 및 BigInt 처리
-    const formattedPost = convertBigIntToString({
-      ...post,
+    const formattedPost = {
+      ...JSON.parse(JSON.stringify(post, (key, value) => 
+        typeof value === 'bigint' ? Number(value) : value
+      )),
       author: {
         ...post.author,
         image: post.author.profileImage,
@@ -66,7 +67,7 @@ export async function GET(
       _count: {
         comments: 0 // 댓글 기능은 아직 구현되지 않음
       }
-    });
+    }
     
     return addCorsHeaders(NextResponse.json({ post: formattedPost }));
   } catch (error) {
@@ -102,9 +103,9 @@ export async function DELETE(
     console.log("인증된 사용자 ID:", authUser.id);
 
     const userId = authUser.id;
-    const postId = params.id;
+    const postId = parseInt(params.id);
 
-    if (!postId) {
+    if (isNaN(postId)) {
       return addCorsHeaders(NextResponse.json(
         { success: false, message: "유효하지 않은 게시물 ID입니다." },
         { status: 400 }

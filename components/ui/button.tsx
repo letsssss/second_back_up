@@ -78,16 +78,15 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
         // 1.5초 후 다음 화면으로 이동
         setTimeout(() => {
-          // 현재 URL에서 orderNumber 추출
+          // 현재 URL에서 transaction ID 추출
           const pathParts = window.location.pathname.split("/")
-          // 현재 경로가 /transaction/order/[orderNumber] 형식이므로 orderNumber는 마지막 부분
-          const orderNumber = pathParts[pathParts.length - 1]
+          const transactionId = pathParts[pathParts.length - 1]
 
           // 구매 확정 완료 상태로 업데이트된 페이지로 이동
-          if (orderNumber) {
-            window.location.href = `/transaction/order/${orderNumber}?status=confirmed`
+          if (transactionId) {
+            window.location.href = `/transaction/${transactionId}?status=confirmed`
           } else {
-            // orderNumber가 없는 경우 마이페이지로 이동
+            // 트랜잭션 ID가 없는 경우 마이페이지로 이동
             window.location.href = "/mypage"
           }
         }, 1500)
